@@ -79,13 +79,19 @@ window.addEventListener('load', () => {
     document.addEventListener('mousedown', startDraw);
     document.addEventListener('mouseup', endDraw);
     window.addEventListener("mousemove", (e) => {
-        // Do not draw if menu is visible.
-        if (!menuVisible) {
-            // erase on shift key press.
-            if (e.shiftKey)
-                middleDraw(e, localStorage.getItem("bcolor"), parseInt(localStorage.getItem("font")) + 20);
-            else
-                middleDraw(e);
+        if (isPanning) {
+            offsetX += e.movementX;
+            offsetY += e.movementY;
+            repaint();
+        } else {
+            // Do not draw if menu is visible.
+            if (!menuVisible) {
+                // erase on shift key press.
+                if (e.shiftKey)
+                    middleDraw(e, localStorage.getItem("bcolor"), parseInt(localStorage.getItem("font")) + 20);
+                else
+                    middleDraw(e);
+            }
         }
     });
     // handle event for clear all.
@@ -131,6 +137,7 @@ window.addEventListener('load', () => {
         }
     }, {passive: false});
     document.addEventListener('keydown', handleKeydown);
+    board.addEventListener('wheel', handleWheel);
 });
 
 /* Set default parameters. */
@@ -152,6 +159,10 @@ let coordinate = {
     y: 0
 };
 let draw = false;
+let isPanning = false;
+let zoom = 1;
+let offsetX = 0;
+let offsetY = 0;
 
 // get board.
 const board = document.getElementById("board");
@@ -294,6 +305,25 @@ const menuItem = (e) => {
     }
 }
 
+const handleWheel = (e) => {
+    e.preventDefault();
+    const scaleAmount = 1.1;
+    const mouseX = e.clientX - board.offsetLeft;
+    const mouseY = e.clientY - board.offsetTop;
+    const oldZoom = zoom;
+
+    if (e.deltaY < 0) {
+        zoom *= scaleAmount;
+    } else {
+        zoom /= scaleAmount;
+    }
+
+    offsetX = mouseX - (mouseX - offsetX) * (zoom / oldZoom);
+    offsetY = mouseY - (mouseY - offsetY) * (zoom / oldZoom);
+
+    repaint();
+}
+
 /* Save to localStorage as image. */
 const saveToLocalStorage = () => {
     // Get image base64 data.
@@ -340,17 +370,20 @@ const resize = () => {
 /* Get positions and store it to coordinate. */
 const position = (e) => {
     // positions.
-    coordinate.x = (e.clientX - board.offsetLeft);
-    coordinate.y = (e.clientY - board.offsetTop);
+    coordinate.x = (e.clientX - board.offsetLeft - offsetX) / zoom;
+    coordinate.y = (e.clientY - board.offsetTop - offsetY) / zoom;
 
 }
 
 /* Start the drawing. */
 const startDraw = (e) => {
     e.preventDefault();
-
-    draw = true;
-    pathsInstance.addNewPath();
+    if (e.button === 1) { // middle mouse button
+        isPanning = true;
+    } else {
+        draw = true;
+        pathsInstance.addNewPath();
+    }
     // update the position.
     position(e);
 }
@@ -360,6 +393,7 @@ const endDraw = (e) => {
     e.preventDefault();
 
     draw = false;
+    isPanning = false;
     pathsInstance.clearLastEmptyRecode();
 }
 
@@ -405,11 +439,17 @@ const middleDraw = (e, color = localStorage.getItem("fcolor"), width = localStor
 }
 
 const resetCanvas = () => {
-    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.restore();
 }
 
 const repaint = () => {
     resetCanvas();
+    ctx.save();
+    ctx.translate(offsetX, offsetY);
+    ctx.scale(zoom, zoom);
     const paths = pathsInstance.paths;
     paths.forEach(({
         width,
@@ -429,6 +469,7 @@ const repaint = () => {
         });
         ctx.stroke();
     });
+    ctx.restore();
 }
 
 const handleKeydown = (event) => {
