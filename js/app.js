@@ -435,43 +435,49 @@ const endDraw = (e) => {
 
 /* drawing */
 const middleDraw = (e, color = localStorage.getItem("fcolor"), width = localStorage.getItem("font")) => {
-    // if stop drawing exit it.
-    if (!draw || currentTool !== 'pen') return;
-    // resets the current path
-    ctx.beginPath();
-    // set width/size, get from local-storage.
-    ctx.lineWidth = width;
-    // Sets the end of the lines drawn round to look better.
-    ctx.lineCap = 'round';
-    // set the line color, get from local-storage.
-    ctx.strokeStyle = color;
+    if (!draw) return;
 
-    /*
-     * Default make the line solid.
-     * source: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/setLineDash
-     */
+    if (currentTool === 'pen') {
+        ctx.beginPath();
+        ctx.lineWidth = width;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = color;
+        ctx.setLineDash([]);
+
+        ctx.moveTo(coordinate.x - offset.x, coordinate.y - offset.y);
+        pathsInstance.addDataToLastPath(coordinate);
+        position(e);
+        ctx.lineTo(coordinate.x - offset.x, coordinate.y - offset.y);
+        ctx.stroke();
+        pathsInstance.clearUndoStack();
+        pathsInstance.addDataToLastPath(coordinate);
+        return;
+    }
+
+    // preview shapes while drawing
+    position(e);
+    repaint();
+    ctx.beginPath();
+    ctx.lineWidth = width;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = color;
     ctx.setLineDash([]);
 
-    // move the cursor accordingly the position of mouse or touch.
-    ctx.moveTo(coordinate.x - offset.x, coordinate.y - offset.y);
-    pathsInstance.addDataToLastPath(coordinate);
-    // update the position as we move around.
-    position(e);
-    // mark position of line
-    ctx.lineTo(coordinate.x - offset.x, coordinate.y - offset.y);
+    if (currentTool === 'line') {
+        ctx.moveTo(startShape.x - offset.x, startShape.y - offset.y);
+        ctx.lineTo(coordinate.x - offset.x, coordinate.y - offset.y);
+    } else if (currentTool === 'rect') {
+        const x = Math.min(startShape.x, coordinate.x) - offset.x;
+        const y = Math.min(startShape.y, coordinate.y) - offset.y;
+        const w = Math.abs(coordinate.x - startShape.x);
+        const h = Math.abs(coordinate.y - startShape.y);
+        ctx.strokeRect(x, y, w, h);
+    } else if (currentTool === 'circle') {
+        const radius = Math.sqrt(Math.pow(coordinate.x - startShape.x, 2) + Math.pow(coordinate.y - startShape.y, 2));
+        ctx.arc(startShape.x - offset.x, startShape.y - offset.y, radius, 0, Math.PI * 2);
+    }
 
-    // Finally, draws the line.
     ctx.stroke();
-    pathsInstance.clearUndoStack();
-    pathsInstance.addDataToLastPath(coordinate);
-
-    /*
-     * Save it real time cause performance issue in some browser like in firefox.
-     * So i think it will be better if we provide save button,
-     * upon press we save it.
-     */
-    //saveToLocalStorage()
-    return;
 }
 
 const resetCanvas = () => {

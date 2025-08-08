@@ -38,12 +38,20 @@
 </div>
 <canvas id="board"></canvas>
 <div id="toolbar" class="toolbar">
-    <button id="hideToolbar">Hide</button>
-    <button data-tool="pen">Pen</button>
-    <button data-tool="rect">Rectangle</button>
-    <button data-tool="circle">Circle</button>
-    <button data-tool="line">Line</button>
-    <input type="color" id="colorPicker" />
+    <button id="hideToolbar" title="Hide toolbar">&#x25B2;</button>
+    <button class="tool" data-tool="pen" title="Pen">
+        <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+    </button>
+    <button class="tool" data-tool="rect" title="Rectangle">
+        <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16"/></svg>
+    </button>
+    <button class="tool" data-tool="circle" title="Circle">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>
+    </button>
+    <button class="tool" data-tool="line" title="Line">
+        <svg viewBox="0 0 24 24"><line x1="4" y1="20" x2="20" y2="4"/></svg>
+    </button>
+    <input type="color" id="colorPicker" title="Color picker" />
     <button onclick="menuItem(this)" content="setting">Setting</button>
     <button onclick="menuItem(this)" content="help">Help</button>
     <button onclick="menuItem(this)" content="about">About</button>
@@ -53,7 +61,7 @@
     <button id="undo" onclick="menuItem(this)" content="undo">Undo</button>
     <button id="redo" onclick="menuItem(this)" content="redo">Redo</button>
 </div>
-<button id="showToolbar" class="toolbar-toggle">Menu</button>
+<button id="showToolbar" class="toolbar-toggle" title="Show menu">&#9776;</button>
 <div id="modal" class="modal">
     <!-- Modal content -->
     <div class="modal-content">
