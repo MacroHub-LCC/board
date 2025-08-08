@@ -51,15 +51,19 @@
     <button class="tool" data-tool="line" title="Line">
         <svg viewBox="0 0 24 24"><line x1="4" y1="20" x2="20" y2="4"/></svg>
     </button>
+    <button class="tool" data-tool="polygon" title="Polygon">
+        <svg viewBox="0 0 24 24"><polygon points="12,2 22,12 12,22 2,12"/></svg>
+    </button>
+    <select id="polygonSides" title="Polygon sides"></select>
     <input type="color" id="colorPicker" title="Color picker" />
-    <button onclick="menuItem(this)" content="setting">Setting</button>
-    <button onclick="menuItem(this)" content="help">Help</button>
-    <button onclick="menuItem(this)" content="about">About</button>
-    <button onclick="menuItem(this)" content="download">Export</button>
-    <button onclick="menuItem(this)" content="download-with-bg">Export with background</button>
-    <button onclick="menuItem(this)" content="download-pdf">Export as PDF</button>
-    <button id="undo" onclick="menuItem(this)" content="undo">Undo</button>
-    <button id="redo" onclick="menuItem(this)" content="redo">Redo</button>
+    <button onclick="menuItem(this)" content="setting" title="Settings" class="icon">⚙</button>
+    <button onclick="menuItem(this)" content="help" title="Help" class="icon">❔</button>
+    <button onclick="menuItem(this)" content="about" title="About" class="icon">ℹ</button>
+    <button onclick="menuItem(this)" content="download" title="Export" class="icon">⬇</button>
+    <button onclick="menuItem(this)" content="download-with-bg" title="Export with background" class="icon">⬇</button>
+    <button onclick="menuItem(this)" content="download-pdf" title="Export as PDF" class="icon">📄</button>
+    <button id="undo" onclick="menuItem(this)" content="undo" title="Undo" class="icon">↶</button>
+    <button id="redo" onclick="menuItem(this)" content="redo" title="Redo" class="icon">↷</button>
 </div>
 <button id="showToolbar" class="toolbar-toggle" title="Show menu">&#9776;</button>
 <div id="modal" class="modal">

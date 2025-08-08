@@ -22,8 +22,8 @@ function checkVisiableUndoAndRebo() {
     const itemUndo = document.getElementById('undo');
     const itemRedo = document.getElementById('redo');
     if (!itemUndo || !itemRedo) return;
-    itemUndo.style.display = havePath ? 'block' : 'none';
-    itemRedo.style.display = haveUndoStack ? 'block' : 'none';
+    itemUndo.style.display = havePath ? 'flex' : 'none';
+    itemRedo.style.display = haveUndoStack ? 'flex' : 'none';
 }
 
 // Event handle on page load.
@@ -71,6 +71,14 @@ window.addEventListener('load', () => {
     colorPicker.addEventListener('change', (e) => {
         localStorage.setItem("fcolor", e.target.value);
     });
+
+    const polygonSides = document.getElementById('polygonSides');
+    for (let i = 3; i <= 32; i++) {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = i;
+        polygonSides.appendChild(opt);
+    }
 
     checkVisiableUndoAndRebo();
 
@@ -424,6 +432,15 @@ const endDraw = (e) => {
             const y = startShape.y + radius * Math.sin(angle);
             pathsInstance.addDataToLastPath({x, y});
         }
+    } else if (currentTool === 'polygon') {
+        const sides = parseInt(document.getElementById('polygonSides').value, 10);
+        const radius = Math.sqrt(Math.pow(endPos.x - startShape.x, 2) + Math.pow(endPos.y - startShape.y, 2));
+        for (let i = 0; i <= sides; i++) {
+            const angle = (i / sides) * Math.PI * 2;
+            const x = startShape.x + radius * Math.cos(angle);
+            const y = startShape.y + radius * Math.sin(angle);
+            pathsInstance.addDataToLastPath({x, y});
+        }
     } else {
         pathsInstance.clearLastEmptyRecode();
     }
@@ -475,6 +492,18 @@ const middleDraw = (e, color = localStorage.getItem("fcolor"), width = localStor
     } else if (currentTool === 'circle') {
         const radius = Math.sqrt(Math.pow(coordinate.x - startShape.x, 2) + Math.pow(coordinate.y - startShape.y, 2));
         ctx.arc(startShape.x - offset.x, startShape.y - offset.y, radius, 0, Math.PI * 2);
+    } else if (currentTool === 'polygon') {
+        const sides = parseInt(document.getElementById('polygonSides').value, 10);
+        const radius = Math.sqrt(Math.pow(coordinate.x - startShape.x, 2) + Math.pow(coordinate.y - startShape.y, 2));
+        const angleStep = (Math.PI * 2) / sides;
+        ctx.moveTo(startShape.x - offset.x + radius * Math.cos(0), startShape.y - offset.y + radius * Math.sin(0));
+        for (let i = 1; i <= sides; i++) {
+            const angle = i * angleStep;
+            const x = startShape.x - offset.x + radius * Math.cos(angle);
+            const y = startShape.y - offset.y + radius * Math.sin(angle);
+            ctx.lineTo(x, y);
+        }
+        ctx.closePath();
     }
 
     ctx.stroke();
