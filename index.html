@@ -8,7 +8,7 @@
     <link rel="icon" href="images/favicon.ico" type="image/x-icon" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="white"/>
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="apple-mobile-web-app-title" content="board">
     <meta name="msapplication-TileColor" content="#FFFFFF">
@@ -16,14 +16,6 @@
     <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
-    <script>
-        function importJs(js) {
-            let element = document.createElement("script");
-            element.setAttribute("charset", "utf-8");
-            element.setAttribute("src", `./js/${js}.js?t=${new Date().getTime()}`);
-            document.getElementsByTagName("footer")[0].appendChild(element);
-        }
-    </script>
 </head>
 <body>
 <div id="first">
@@ -37,18 +29,37 @@
     </button>
 </div>
 <canvas id="board"></canvas>
-<div class="menu">
-    <ul class="items">
-        <li class="item" onclick="menuItem(this)" content="setting">Setting</li>
-        <li class="item" onclick="menuItem(this)" content="help">Help</li>
-        <li class="item" onclick="menuItem(this)" content="about">About</li>
-        <li class="item" onclick="menuItem(this)" content="download">Export</li>
-        <li class="item" onclick="menuItem(this)" content="download-with-bg">Export with background</li>
-        <li class="item" onclick="menuItem(this)" content="download-pdf">Export as PDF</li>
-        <li class="item" id="undo" onclick="menuItem(this)" content="undo">Undo</li>
-        <li class="item" id="redo" onclick="menuItem(this)" content="redo">Redo</li>
-    </ul>
+<div id="toolbar" class="toolbar">
+    <button id="hideToolbar" title="Hide toolbar">&#x25B2;</button>
+    <button class="tool" data-tool="pen" title="Pen">
+        <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+    </button>
+    <button class="tool" data-tool="rect" title="Rectangle">
+        <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16"/></svg>
+    </button>
+    <button class="tool" data-tool="circle" title="Circle">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>
+    </button>
+    <button class="tool" data-tool="line" title="Line">
+        <svg viewBox="0 0 24 24"><line x1="4" y1="20" x2="20" y2="4"/></svg>
+    </button>
+    <button class="tool" data-tool="polygon" title="Polygon">
+        <svg viewBox="0 0 24 24"><polygon points="12,2 22,12 12,22 2,12"/></svg>
+    </button>
+    <select id="polygonSides" title="Polygon sides"></select>
+    <input type="color" id="colorPicker" title="Pen color" />
+    <input type="color" id="bgColorPicker" title="Background color" />
+    <button class="icon pen-option" data-pen="pencil" title="Pencil">✏</button>
+    <button class="icon pen-option" data-pen="marker" title="Marker">🖊</button>
+    <button class="icon pen-option" data-pen="highlighter" title="Highlighter">🖍</button>
+    <button onclick="menuItem(this)" content="setting" title="Settings" class="icon">⚙</button>
+    <button onclick="menuItem(this)" content="help" title="Help" class="icon">❔</button>
+    <button onclick="menuItem(this)" content="about" title="About" class="icon">ℹ</button>
+    <button onclick="menuItem(this)" content="download-pdf" title="Export as PDF" class="icon">📄</button>
+    <button id="undo" onclick="menuItem(this)" content="undo" title="Undo" class="icon">↶</button>
+    <button id="redo" onclick="menuItem(this)" content="redo" title="Redo" class="icon">↷</button>
 </div>
+<button id="showToolbar" class="toolbar-toggle" title="Show menu">&#9776;</button>
 <div id="modal" class="modal">
     <!-- Modal content -->
     <div class="modal-content">
@@ -145,7 +156,10 @@
 <script src="config.js"></script>
 <script>
     document.getElementById("first").style.display = "none";
-    importJs("undo");
-    importJs("app");
 </script>
+<script src="js/undo.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/draw.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/main.js"></script>
 </html>

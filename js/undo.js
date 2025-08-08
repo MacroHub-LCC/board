@@ -2,10 +2,12 @@ class Paths {
   paths = [];
   undoStack = [];
 
-  addNewPath = (color = localStorage.getItem("fcolor"), width = localStorage.getItem("font")) => {
+  addNewPath = (color = localStorage.getItem("fcolor"), width = localStorage.getItem("font"), type = 'pen', opacity = 1) => {
     this.paths.push({
         color,
         width,
+        type,
+        opacity,
         paths: []
     });
   }
