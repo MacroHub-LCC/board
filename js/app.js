@@ -15,6 +15,17 @@ if (debug === false) {
         }
     }
 }
+
+function checkVisiableUndoAndRebo() {
+    const havePath = !!(pathsInstance.paths.length);
+    const haveUndoStack = !!(pathsInstance.undoStack.length);
+    const itemUndo = document.getElementById('undo');
+    const itemRedo = document.getElementById('redo');
+    if (!itemUndo || !itemRedo) return;
+    itemUndo.style.display = havePath ? 'block' : 'none';
+    itemRedo.style.display = haveUndoStack ? 'block' : 'none';
+}
+
 // Event handle on page load.
 window.addEventListener('load', () => {
     // Resizes the canvas once the window loads
@@ -33,78 +44,60 @@ window.addEventListener('load', () => {
         restoreFromLocalStorage();
     };
 
-    // context menu
-    const menu = document.querySelector(".menu");
-    let menuVisible = false;
-    const toggleMenu = (command) => {
-        menu.style.display = command === "show" ? "block" : "none";
-    };
-    // hide menu on click
-    window.addEventListener("click", e => {
-        if (menuVisible) toggleMenu("hide");
-        menuVisible = false;
-    });
-    // context menu handle
-    window.addEventListener("contextmenu", e => {
-        e.preventDefault();
-        const origin = {
-            left: e.clientX,
-            top: e.clientY
-        };
-        setMenuPosition(origin);
-        return false;
-    });
-    // get position for menu.
-    const setMenuPosition = ({
-        top,
-        left
-    }) => {
-        menu.style.left = `${left}px`;
-        menu.style.top = `${top}px`;
-        checkVisiableUndoAndRebo();
-        toggleMenu("show");
-        menuVisible = true;
-    };
+    // toolbar controls
+    const toolbar = document.getElementById('toolbar');
+    const showToolbar = document.getElementById('showToolbar');
+    const hideToolbar = document.getElementById('hideToolbar');
 
-    const checkVisiableUndoAndRebo = () => {
-        const havePath = !!(pathsInstance.paths.length);
-        const haveUndoStack = !!(pathsInstance.undoStack.length);
-        const itemUndo = document.getElementById('undo');
-        const itemRedo = document.getElementById('redo');
-        itemUndo.style.display = havePath ? 'block' : 'none';
-        itemRedo.style.display = haveUndoStack ? 'block' : 'none';
-    }
+    hideToolbar.addEventListener('click', () => {
+        toolbar.style.display = 'none';
+        showToolbar.style.display = 'block';
+    });
+
+    showToolbar.addEventListener('click', () => {
+        toolbar.style.display = 'flex';
+        showToolbar.style.display = 'none';
+    });
+
+    document.querySelectorAll('[data-tool]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            currentTool = btn.getAttribute('data-tool');
+        });
+    });
+
+    const colorPicker = document.getElementById('colorPicker');
+    const storedColor = localStorage.getItem("fcolor");
+    colorPicker.value = storedColor && storedColor.startsWith('#') ? storedColor : '#ffffff';
+    colorPicker.addEventListener('change', (e) => {
+        localStorage.setItem("fcolor", e.target.value);
+    });
+
+    checkVisiableUndoAndRebo();
 
     // handle mouse events.
     document.addEventListener('mousedown', startDraw);
     document.addEventListener('mouseup', endDraw);
     window.addEventListener("mousemove", (e) => {
-        // Do not draw if menu is visible.
-        if (!menuVisible) {
-            if (panning) {
-                const dx = e.clientX - panLast.x;
-                const dy = e.clientY - panLast.y;
-                offset.x -= dx;
-                offset.y -= dy;
-                panLast.x = e.clientX;
-                panLast.y = e.clientY;
-                repaint();
-            } else {
-                // erase on shift key press.
-                if (e.shiftKey)
-                    middleDraw(e, localStorage.getItem("bcolor"), parseInt(localStorage.getItem("font")) + 20);
-                else
-                    middleDraw(e);
-            }
+        if (panning) {
+            const dx = e.clientX - panLast.x;
+            const dy = e.clientY - panLast.y;
+            offset.x -= dx;
+            offset.y -= dy;
+            panLast.x = e.clientX;
+            panLast.y = e.clientY;
+            repaint();
+        } else {
+            if (e.shiftKey)
+                middleDraw(e, localStorage.getItem("bcolor"), parseInt(localStorage.getItem("font")) + 20);
+            else
+                middleDraw(e);
         }
     });
 
     document.addEventListener('wheel', (e) => {
-        if (!menuVisible) {
-            offset.x += e.deltaX;
-            offset.y += e.deltaY;
-            repaint();
-        }
+        offset.x += e.deltaX;
+        offset.y += e.deltaY;
+        repaint();
         e.preventDefault();
     }, {passive: false});
     // handle event for clear all.
@@ -123,36 +116,24 @@ window.addEventListener('load', () => {
         // #15 Disable swipe to go back in chrome
         e.preventDefault();
 
-        // Do not draw if menu is visible.
-        if (!menuVisible) {
-            if (panning && e.touches.length === 2) {
-                const touch = e.touches[0];
-                const dx = touch.clientX - panLast.x;
-                const dy = touch.clientY - panLast.y;
-                offset.x -= dx;
-                offset.y -= dy;
-                panLast.x = touch.clientX;
-                panLast.y = touch.clientY;
-                repaint();
-            } else {
-                // Only allow to draw with one tap/finger
-                if (e.touches.length === 1)
-                    middleDraw(e.touches[0]);
+        if (panning && e.touches.length === 2) {
+            const touch = e.touches[0];
+            const dx = touch.clientX - panLast.x;
+            const dy = touch.clientY - panLast.y;
+            offset.x -= dx;
+            offset.y -= dy;
+            panLast.x = touch.clientX;
+            panLast.y = touch.clientY;
+            repaint();
+        } else {
+            // Only allow to draw with one tap/finger
+            if (e.touches.length === 1)
+                middleDraw(e.touches[0]);
 
-                // Open Menu upon three finger tap.
-                if (e.touches.length === 3) {
-                    // get the menu position.
-                    const origin = {
-                        left: e.touches[0].clientX,
-                        top: e.touches[0].clientY
-                    };
-                    setMenuPosition(origin);
-                }
-                // On five finger remove all.
-                if (e.touches.length === 5) {
-                    localStorage.removeItem("board");
-                    resize();
-                }
+            // On five finger remove all.
+            if (e.touches.length === 5) {
+                localStorage.removeItem("board");
+                resize();
             }
         }
     }, {passive: false});
@@ -178,6 +159,8 @@ let coordinate = {
     y: 0
 };
 let draw = false;
+let currentTool = 'pen';
+let startShape = {x:0, y:0};
 
 // get board.
 const board = document.getElementById("board");
@@ -312,11 +295,13 @@ const menuItem = (e) => {
     if (type === "undo") {
         pathsInstance.undoPath();
         repaint();
+        checkVisiableUndoAndRebo();
     }
 
     if (type === "redo") {
         pathsInstance.redoPath();
         repaint();
+        checkVisiableUndoAndRebo();
     }
 }
 
@@ -377,6 +362,7 @@ const position = (e) => {
 
 /* Start the drawing. */
 const startDraw = (e) => {
+    if (e.target !== board) return;
     e.preventDefault();
 
     // handle panning for touch (two fingers)
@@ -396,13 +382,14 @@ const startDraw = (e) => {
     }
 
     draw = true;
-    pathsInstance.addNewPath();
-    // update the position.
     position(e.touches ? e.touches[0] : e);
+    startShape = {x: coordinate.x, y: coordinate.y};
+    pathsInstance.addNewPath(localStorage.getItem("fcolor"), localStorage.getItem("font"), currentTool);
 }
 
 /* End the drawing. */
 const endDraw = (e) => {
+    if (e.target !== board) return;
     e.preventDefault();
 
     if (panning) {
@@ -410,14 +397,46 @@ const endDraw = (e) => {
         return;
     }
 
+    if (!draw) return;
     draw = false;
-    pathsInstance.clearLastEmptyRecode();
+
+    position(e.touches ? e.touches[0] : e);
+    const endPos = {x: coordinate.x, y: coordinate.y};
+
+    if (currentTool === 'line') {
+        pathsInstance.addDataToLastPath(startShape);
+        pathsInstance.addDataToLastPath(endPos);
+    } else if (currentTool === 'rect') {
+        const rectPoints = [
+            {x: startShape.x, y: startShape.y},
+            {x: startShape.x, y: endPos.y},
+            {x: endPos.x, y: endPos.y},
+            {x: endPos.x, y: startShape.y},
+            {x: startShape.x, y: startShape.y}
+        ];
+        rectPoints.forEach(pt => pathsInstance.addDataToLastPath(pt));
+    } else if (currentTool === 'circle') {
+        const radius = Math.sqrt(Math.pow(endPos.x - startShape.x, 2) + Math.pow(endPos.y - startShape.y, 2));
+        const segments = 36;
+        for (let i = 0; i <= segments; i++) {
+            const angle = (i / segments) * Math.PI * 2;
+            const x = startShape.x + radius * Math.cos(angle);
+            const y = startShape.y + radius * Math.sin(angle);
+            pathsInstance.addDataToLastPath({x, y});
+        }
+    } else {
+        pathsInstance.clearLastEmptyRecode();
+    }
+
+    pathsInstance.clearUndoStack();
+    repaint();
+    checkVisiableUndoAndRebo();
 }
 
 /* drawing */
 const middleDraw = (e, color = localStorage.getItem("fcolor"), width = localStorage.getItem("font")) => {
     // if stop drawing exit it.
-    if (!draw) return;
+    if (!draw || currentTool !== 'pen') return;
     // resets the current path
     ctx.beginPath();
     // set width/size, get from local-storage.
@@ -495,5 +514,6 @@ const handleKeydown = (event) => {
     }
     if (isUndo || isRedo) {
         repaint();
+        checkVisiableUndoAndRebo();
     }
 }

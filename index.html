@@ -37,18 +37,23 @@
     </button>
 </div>
 <canvas id="board"></canvas>
-<div class="menu">
-    <ul class="items">
-        <li class="item" onclick="menuItem(this)" content="setting">Setting</li>
-        <li class="item" onclick="menuItem(this)" content="help">Help</li>
-        <li class="item" onclick="menuItem(this)" content="about">About</li>
-        <li class="item" onclick="menuItem(this)" content="download">Export</li>
-        <li class="item" onclick="menuItem(this)" content="download-with-bg">Export with background</li>
-        <li class="item" onclick="menuItem(this)" content="download-pdf">Export as PDF</li>
-        <li class="item" id="undo" onclick="menuItem(this)" content="undo">Undo</li>
-        <li class="item" id="redo" onclick="menuItem(this)" content="redo">Redo</li>
-    </ul>
+<div id="toolbar" class="toolbar">
+    <button id="hideToolbar">Hide</button>
+    <button data-tool="pen">Pen</button>
+    <button data-tool="rect">Rectangle</button>
+    <button data-tool="circle">Circle</button>
+    <button data-tool="line">Line</button>
+    <input type="color" id="colorPicker" />
+    <button onclick="menuItem(this)" content="setting">Setting</button>
+    <button onclick="menuItem(this)" content="help">Help</button>
+    <button onclick="menuItem(this)" content="about">About</button>
+    <button onclick="menuItem(this)" content="download">Export</button>
+    <button onclick="menuItem(this)" content="download-with-bg">Export with background</button>
+    <button onclick="menuItem(this)" content="download-pdf">Export as PDF</button>
+    <button id="undo" onclick="menuItem(this)" content="undo">Undo</button>
+    <button id="redo" onclick="menuItem(this)" content="redo">Redo</button>
 </div>
+<button id="showToolbar" class="toolbar-toggle">Menu</button>
 <div id="modal" class="modal">
     <!-- Modal content -->
     <div class="modal-content">

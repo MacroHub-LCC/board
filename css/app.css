@@ -9,27 +9,33 @@ html, body {
     width: 100%;
     height: 100%;
 }
-/* context menu */
-.menu {
-    width: auto;
-    box-shadow: 0 4px 5px 3px rgba(0, 0, 0, 0.2);
+/* top toolbar */
+.toolbar {
     position: fixed;
-    display: none;
-    background-color: white;
-}
-.menu .items {
-    list-style: none;
-    padding: 10px 0;
-}
-.menu .items .item {
-    font-weight: 500;
-    font-size: 18px;
-    padding: 10px 40px 10px 20px;
-    cursor: pointer;
-}
-.menu .items .item:hover {
-    background-color: black;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: #333;
     color: white;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 5px;
+    z-index: 1000;
+}
+.toolbar button,
+.toolbar input[type="color"] {
+    margin: 5px;
+}
+.toolbar-toggle {
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: #333;
+    color: white;
+    padding: 5px;
+    z-index: 1001;
+    display: none;
 }
 .modal {
     display: none;
