@@ -202,7 +202,7 @@ const downland = () => {
     link.click();
 }
 /* Menu handling. */
-const menuItem = (e) => {
+function menuItem(e) {
     let type = e.getAttribute("content");
     const title = document.getElementsByClassName("modal-heading")[0];
     const body = document.getElementsByClassName("modal-body")[0];
