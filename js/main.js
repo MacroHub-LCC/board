@@ -6,11 +6,14 @@ window.addEventListener('load', () => {
     }
 
     resize();
+    restoreFromLocalStorage();
     window.onresize = () => {
         saveToLocalStorage();
         resize();
         restoreFromLocalStorage();
     };
+
+    window.addEventListener('beforeunload', saveToLocalStorage);
 
     initUI();
 

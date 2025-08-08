@@ -15,18 +15,21 @@ html, body {
     top: 0;
     left: 0;
     width: 100%;
-    background: #f5f5f5;
-    color: #444;
+    background: #fff;
+    border-bottom: 1px solid #ccc;
+    color: #333;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    padding: 4px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    gap: 4px;
+    padding: 4px 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     z-index: 1000;
 }
 .toolbar button,
-.toolbar input[type="color"] {
-    margin: 4px;
+.toolbar input[type="color"],
+.toolbar select {
+    margin: 2px;
 }
 .toolbar button {
     background: none;
@@ -34,6 +37,11 @@ html, body {
     color: inherit;
     padding: 6px 8px;
     cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+.toolbar button:hover {
+    background: #e0e0e0;
 }
 .toolbar button.tool {
     width: 40px;
@@ -49,17 +57,19 @@ html, body {
 }
 .toolbar input[type="color"] {
     padding: 0;
-    border: none;
-    width: 40px;
-    height: 40px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 32px;
+    height: 32px;
     background: none;
 }
 .toolbar select {
-    height: 40px;
+    height: 32px;
     padding: 4px;
     border: 1px solid #ccc;
-    background: white;
+    background: #fff;
     color: inherit;
+    border-radius: 4px;
 }
 .toolbar button.icon {
     width: 40px;
@@ -73,12 +83,12 @@ html, body {
     position: fixed;
     top: 0;
     left: 0;
-    background: #f5f5f5;
-    color: #444;
+    background: #fff;
+    color: #333;
     padding: 6px 8px;
     border: 1px solid #ccc;
     border-bottom-right-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     z-index: 1001;
     display: none;
 }

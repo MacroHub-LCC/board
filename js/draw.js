@@ -108,6 +108,7 @@ function endDraw(e) {
     pathsInstance.clearUndoStack();
     repaint();
     checkVisiableUndoAndRebo();
+    saveToLocalStorage();
 }
 
 function middleDraw(e, color = localStorage.getItem("fcolor"), width = localStorage.getItem("font")) {
@@ -171,6 +172,7 @@ function middleDraw(e, color = localStorage.getItem("fcolor"), width = localStor
 }
 
 function resetCanvas() {
+    ctx.fillStyle = localStorage.getItem('bcolor') || '#000000';
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 }
 

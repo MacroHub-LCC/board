@@ -10,33 +10,20 @@ function checkVisiableUndoAndRebo() {
     itemRedo.style.display = haveUndoStack ? 'flex' : 'none';
 }
 
-function downloadImage() {
-    const link = document.createElement('a');
-    const locale = new Date().toLocaleString();
-    const filename = `board${locale}.png`;
-    link.download = filename;
-    link.href = board.toDataURL();
-    link.click();
-}
-
 function menuItem(e) {
     let type = e.getAttribute("content");
     const title = document.getElementsByClassName("modal-heading")[0];
-    const body = document.getElementsByClassName("modal-body")[0];
-    const footer = document.getElementsByClassName("modal-footer")[0];
-
-    if (type == 'download') {
-        downloadImage();
-    }
-    if (type == 'download-with-bg') {
-        ctx.globalCompositeOperation = "destination-over";
-        ctx.fillStyle = localStorage.getItem("bcolor");
-        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-        downloadImage();
-    }
     if(type === 'download-pdf'){
-        const doc = new jsPDF("l" , "mm" , "a3");
-        doc.addImage(board.toDataURL("image/jpeg" , 1.0) , 'JPEG' , 0 , 0  );
+        const exportCanvas = document.createElement('canvas');
+        exportCanvas.width = board.width;
+        exportCanvas.height = board.height;
+        const exportCtx = exportCanvas.getContext('2d');
+        exportCtx.fillStyle = localStorage.getItem('bcolor');
+        exportCtx.fillRect(0, 0, board.width, board.height);
+        exportCtx.drawImage(board, 0, 0);
+        const orientation = board.width > board.height ? 'l' : 'p';
+        const doc = new jsPDF(orientation, 'px', [board.width, board.height]);
+        doc.addImage(exportCanvas.toDataURL('image/png', 1.0), 'PNG', 0, 0, board.width, board.height);
         const locale = new Date().toLocaleString();
         doc.save(`board${locale}.pdf`);
     }
@@ -145,6 +132,16 @@ function initUI() {
     colorPicker.value = storedColor && storedColor.startsWith('#') ? storedColor : '#ffffff';
     colorPicker.addEventListener('change', (e) => {
         localStorage.setItem("fcolor", e.target.value);
+    });
+
+    const bgPicker = document.getElementById('bgColorPicker');
+    const storedBg = localStorage.getItem('bcolor');
+    bgPicker.value = storedBg && storedBg.startsWith('#') ? storedBg : '#000000';
+    bgPicker.addEventListener('change', (e) => {
+        localStorage.setItem('bcolor', e.target.value);
+        board.style.backgroundColor = e.target.value;
+        repaint();
+        saveToLocalStorage();
     });
 
     const polygonSides = document.getElementById('polygonSides');
