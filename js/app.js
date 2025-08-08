@@ -65,6 +65,12 @@ window.addEventListener('load', () => {
         });
     });
 
+    document.querySelectorAll('[data-pen]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            currentPen = btn.getAttribute('data-pen');
+        });
+    });
+
     const colorPicker = document.getElementById('colorPicker');
     const storedColor = localStorage.getItem("fcolor");
     colorPicker.value = storedColor && storedColor.startsWith('#') ? storedColor : '#ffffff';
@@ -168,6 +174,12 @@ let coordinate = {
 };
 let draw = false;
 let currentTool = 'pen';
+let currentPen = 'pencil';
+const penStyles = {
+    pencil: {width: 2, opacity: 1},
+    marker: {width: 5, opacity: 1},
+    highlighter: {width: 12, opacity: 0.3}
+};
 let startShape = {x:0, y:0};
 
 // get board.
@@ -392,7 +404,14 @@ const startDraw = (e) => {
     draw = true;
     position(e.touches ? e.touches[0] : e);
     startShape = {x: coordinate.x, y: coordinate.y};
-    pathsInstance.addNewPath(localStorage.getItem("fcolor"), localStorage.getItem("font"), currentTool);
+    let width = localStorage.getItem("font");
+    let opacity = 1;
+    if (currentTool === 'pen') {
+        const style = penStyles[currentPen];
+        width = style.width;
+        opacity = style.opacity;
+    }
+    pathsInstance.addNewPath(localStorage.getItem("fcolor"), width, currentTool, opacity);
 }
 
 /* End the drawing. */
@@ -455,10 +474,12 @@ const middleDraw = (e, color = localStorage.getItem("fcolor"), width = localStor
     if (!draw) return;
 
     if (currentTool === 'pen') {
+        const style = penStyles[currentPen];
         ctx.beginPath();
-        ctx.lineWidth = width;
+        ctx.lineWidth = style.width;
         ctx.lineCap = 'round';
         ctx.strokeStyle = color;
+        ctx.globalAlpha = style.opacity;
         ctx.setLineDash([]);
 
         ctx.moveTo(coordinate.x - offset.x, coordinate.y - offset.y);
@@ -466,6 +487,7 @@ const middleDraw = (e, color = localStorage.getItem("fcolor"), width = localStor
         position(e);
         ctx.lineTo(coordinate.x - offset.x, coordinate.y - offset.y);
         ctx.stroke();
+        ctx.globalAlpha = 1;
         pathsInstance.clearUndoStack();
         pathsInstance.addDataToLastPath(coordinate);
         return;
@@ -519,11 +541,13 @@ const repaint = () => {
     paths.forEach(({
         width,
         color,
+        opacity = 1,
         paths
     }) => {
         ctx.beginPath();
         ctx.lineWidth = width;
         ctx.strokeStyle = color;
+        ctx.globalAlpha = opacity;
         ctx.moveTo(paths[0].x - offset.x, paths[0].y - offset.y);
 
         paths.forEach(({
@@ -533,6 +557,7 @@ const repaint = () => {
             ctx.lineTo(x - offset.x, y - offset.y);
         });
         ctx.stroke();
+        ctx.globalAlpha = 1;
     });
 }
 
