@@ -81,11 +81,21 @@ window.addEventListener('load', () => {
     window.addEventListener("mousemove", (e) => {
         // Do not draw if menu is visible.
         if (!menuVisible) {
-            // erase on shift key press.
-            if (e.shiftKey)
-                middleDraw(e, localStorage.getItem("bcolor"), parseInt(localStorage.getItem("font")) + 20);
-            else
-                middleDraw(e);
+            if (panning) {
+                const dx = e.clientX - panLast.x;
+                const dy = e.clientY - panLast.y;
+                offset.x -= dx;
+                offset.y -= dy;
+                panLast.x = e.clientX;
+                panLast.y = e.clientY;
+                repaint();
+            } else {
+                // erase on shift key press.
+                if (e.shiftKey)
+                    middleDraw(e, localStorage.getItem("bcolor"), parseInt(localStorage.getItem("font")) + 20);
+                else
+                    middleDraw(e);
+            }
         }
     });
     // handle event for clear all.
@@ -106,27 +116,34 @@ window.addEventListener('load', () => {
 
         // Do not draw if menu is visible.
         if (!menuVisible) {
-            // erase on double tap.
-            if (e.touches.length === 2)
-                middleDraw(e.touches[0], localStorage.getItem("bcolor"), parseInt(localStorage.getItem("font")) + 20);
+            if (panning && e.touches.length === 2) {
+                const touch = e.touches[0];
+                const dx = touch.clientX - panLast.x;
+                const dy = touch.clientY - panLast.y;
+                offset.x -= dx;
+                offset.y -= dy;
+                panLast.x = touch.clientX;
+                panLast.y = touch.clientY;
+                repaint();
+            } else {
+                // Only allow to draw with one tap/finger
+                if (e.touches.length === 1)
+                    middleDraw(e.touches[0]);
 
-            // Only allow to draw with one tap/finger
-            if (e.touches.length === 1)
-                middleDraw(e.touches[0]);
-
-            // Open Menu upon three finger tap.
-            if (e.touches.length === 3) {
-                // get the menu position.
-                const origin = {
-                    left: e.touches[0].clientX,
-                    top: e.touches[0].clientY
-                };
-                setMenuPosition(origin);
-            }
-            // On five finger remove all.
-            if (e.touches.length === 5) {
-                localStorage.removeItem("board");
-                resize();
+                // Open Menu upon three finger tap.
+                if (e.touches.length === 3) {
+                    // get the menu position.
+                    const origin = {
+                        left: e.touches[0].clientX,
+                        top: e.touches[0].clientY
+                    };
+                    setMenuPosition(origin);
+                }
+                // On five finger remove all.
+                if (e.touches.length === 5) {
+                    localStorage.removeItem("board");
+                    resize();
+                }
             }
         }
     }, {passive: false});
@@ -338,10 +355,14 @@ const resize = () => {
 }
 
 /* Get positions and store it to coordinate. */
+let offset = { x: 0, y: 0 };
+let panning = false;
+let panLast = { x: 0, y: 0 };
+
 const position = (e) => {
-    // positions.
-    coordinate.x = (e.clientX - board.offsetLeft);
-    coordinate.y = (e.clientY - board.offsetTop);
+    // positions in world coordinates.
+    coordinate.x = (e.clientX - board.offsetLeft) + offset.x;
+    coordinate.y = (e.clientY - board.offsetTop) + offset.y;
 
 }
 
@@ -349,15 +370,36 @@ const position = (e) => {
 const startDraw = (e) => {
     e.preventDefault();
 
+    // handle panning for touch (two fingers)
+    if (e.touches && e.touches.length === 2) {
+        panning = true;
+        panLast.x = e.touches[0].clientX;
+        panLast.y = e.touches[0].clientY;
+        return;
+    }
+
+    // handle panning for mouse with ctrl key
+    if (!e.touches && e.ctrlKey) {
+        panning = true;
+        panLast.x = e.clientX;
+        panLast.y = e.clientY;
+        return;
+    }
+
     draw = true;
     pathsInstance.addNewPath();
     // update the position.
-    position(e);
+    position(e.touches ? e.touches[0] : e);
 }
 
 /* End the drawing. */
 const endDraw = (e) => {
     e.preventDefault();
+
+    if (panning) {
+        panning = false;
+        return;
+    }
 
     draw = false;
     pathsInstance.clearLastEmptyRecode();
@@ -383,12 +425,12 @@ const middleDraw = (e, color = localStorage.getItem("fcolor"), width = localStor
     ctx.setLineDash([]);
 
     // move the cursor accordingly the position of mouse or touch.
-    ctx.moveTo(coordinate.x, coordinate.y);
+    ctx.moveTo(coordinate.x - offset.x, coordinate.y - offset.y);
     pathsInstance.addDataToLastPath(coordinate);
     // update the position as we move around.
     position(e);
     // mark position of line
-    ctx.lineTo(coordinate.x, coordinate.y);
+    ctx.lineTo(coordinate.x - offset.x, coordinate.y - offset.y);
 
     // Finally, draws the line.
     ctx.stroke();
@@ -419,13 +461,13 @@ const repaint = () => {
         ctx.beginPath();
         ctx.lineWidth = width;
         ctx.strokeStyle = color;
-        ctx.moveTo(paths[0].x, paths[0].y);
+        ctx.moveTo(paths[0].x - offset.x, paths[0].y - offset.y);
 
         paths.forEach(({
             x,
             y
         }) => {
-            ctx.lineTo(x, y);
+            ctx.lineTo(x - offset.x, y - offset.y);
         });
         ctx.stroke();
     });

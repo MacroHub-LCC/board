@@ -2,6 +2,8 @@
 Simple, standalone, flexible and very lightweight board app/PWA in JavaScript.  
   
 ## Features
+ ### v1.3.0
+ - [x] Infinite canvas with pan support (two finger drag on mobile, Ctrl + drag on desktop)
  ### v1.2.0
   - [x] Disable swipe to go back in chrome [#15](https://github.com/lablnet/board/issues/15)
 
